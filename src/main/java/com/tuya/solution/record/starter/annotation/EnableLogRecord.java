@@ -53,4 +53,11 @@ public @interface EnableLogRecord {
      * @return 事务 advisor 的优先级
      */
     int order() default Ordered.LOWEST_PRECEDENCE;
+
+
+    /**
+     * 自定义解析默认超时告警时间
+     * @return 超时告警时间 单位/ms
+     */
+    long alarmTime() default 500L;
 }

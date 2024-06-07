@@ -35,15 +35,35 @@ import java.util.stream.Collectors;
 @Slf4j
 public class LogRecordInterceptor extends LogRecordValueParser implements MethodInterceptor, Serializable, SmartInitializingSingleton {
 
+    /**
+     * 日志记录注解获取来源接口
+     */
     private LogRecordOperationSource logRecordOperationSource;
 
+    /**
+     * 租户Id
+     */
     private String tenantId;
 
+    /**
+     * 自定义日志记录持久化接口
+     */
     private ILogRecordService bizLogService;
 
+    /**
+     * 自定义操作用户获取接口
+     */
     private IOperatorGetService operatorGetService;
 
+    /**
+     * 是否需要把日志记录加入到事务回滚中
+     */
     private boolean joinTransaction;
+
+    /**
+     * 自定义解析接口调用超时告警时间
+     */
+    private long alarmTime;
 
     @Override
     public void afterSingletonsInstantiated() {
@@ -74,10 +94,19 @@ public class LogRecordInterceptor extends LogRecordValueParser implements Method
         try {
             // 找到方法链路上所有携带LogRecordAnnotation的日志记录操作
             operations = logRecordOperationSource.computeLogRecordOperations(method, targetClass);
+
             // 找到方法链路上所有的El表达式模版
             List<String> spElTemplates = getBeforeExecuteFunctionTemplate(operations);
+
             // //业务逻辑执行前的自定义函数解析
+            long nowTime = System.currentTimeMillis();
             functionNameAndReturnMap = processBeforeExecuteFunctionTemplate(spElTemplates, targetClass, method, args);
+
+            // 添加告警信息,方便查询信息
+            if (System.currentTimeMillis() - nowTime > alarmTime) {
+                log.warn("LogRecordInterceptor execute 自定义前置解析方法调用超过告警时间,告警方法:{}", method.getName());
+            }
+
         } catch (Exception e) {
             log.error("LogRecordInterceptor invoke 日志记录方法执行前自定义函数解析出现异常:", e);
         }
@@ -168,7 +197,13 @@ public class LogRecordInterceptor extends LogRecordValueParser implements Method
         String action = operation.getSuccessLogTemplate();
         List<String> spElTemplates = getSpElTemplates(operation, action);
         String operatorIdFromService = getOperatorIdFromServiceAndPutTemplate(operation, spElTemplates);
+
+        long nowTime = System.currentTimeMillis();
         Map<String, String> expressionValues = processTemplate(spElTemplates, methodExecuteResult, functionNameAndReturnMap);
+        if (System.currentTimeMillis() - nowTime > alarmTime) {
+            log.warn("LogRecordInterceptor successRecordExecute 自定义成功后置解析方法调用超过告警时间,告警方法:{}", methodExecuteResult.getMethod().getName());
+        }
+
         saveLog(methodExecuteResult.getMethod(), true, operation, operatorIdFromService, action, expressionValues);
     }
 
@@ -190,7 +225,12 @@ public class LogRecordInterceptor extends LogRecordValueParser implements Method
         List<String> spElTemplates = getSpElTemplates(operation, action);
         String operatorIdFromService = getOperatorIdFromServiceAndPutTemplate(operation, spElTemplates);
 
+        long nowTime = System.currentTimeMillis();
         Map<String, String> expressionValues = processTemplate(spElTemplates, methodExecuteResult, functionNameAndReturnMap);
+        if (System.currentTimeMillis() - nowTime > alarmTime) {
+            log.warn("LogRecordInterceptor failRecordExecute 自定义失败后置解析方法调用超过告警时间,告警方法:{}", methodExecuteResult.getMethod().getName());
+        }
+
         saveLog(methodExecuteResult.getMethod(), true, operation, operatorIdFromService, action, expressionValues);
     }
 
@@ -235,9 +275,10 @@ public class LogRecordInterceptor extends LogRecordValueParser implements Method
 
     /**
      * 获取真实操作用户信息
-     * @param operation 方法注解信息
+     *
+     * @param operation             方法注解信息
      * @param operatorIdFromService 真实用户信息
-     * @param expressionValues 表达式参数信息
+     * @param expressionValues      表达式参数信息
      * @return
      */
     private String getRealOperatorId(LogRecordOps operation, String operatorIdFromService, Map<String, String> expressionValues) {

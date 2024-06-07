@@ -78,6 +78,7 @@ public class LogRecordProxyAutoConfiguration implements ImportAware {
         interceptor.setLogRecordOperationSource(logRecordOperationSource());
         interceptor.setTenantId(enableLogRecord.getString("tenant"));
         interceptor.setJoinTransaction(enableLogRecord.getBoolean("joinTransaction"));
+        interceptor.setAlarmTime(enableLogRecord.getNumber("alarmTime"));
         return interceptor;
     }
 
