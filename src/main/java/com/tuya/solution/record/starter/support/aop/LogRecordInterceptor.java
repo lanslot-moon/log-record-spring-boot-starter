@@ -287,7 +287,8 @@ public class LogRecordInterceptor extends LogRecordValueParser implements Method
 
     private void saveLog(Method method, boolean flag, LogRecordOps operation, String operatorIdFromService,
                          String action, Map<String, String> expressionValues) {
-        if (StringUtils.isEmpty(expressionValues.get(action)) || Objects.equals(action, expressionValues.get(action))) {
+        // 必须存在成功模版存在#并且key和value一致才不执行保存日志结果
+        if (StringUtils.isEmpty(expressionValues.get(action)) || (action.contains("#") && Objects.equals(action, expressionValues.get(action)))) {
             return;
         }
         LogRecordModel logRecord = LogRecordModel.builder()
