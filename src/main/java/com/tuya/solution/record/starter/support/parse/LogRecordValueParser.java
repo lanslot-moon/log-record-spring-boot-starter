@@ -20,6 +20,7 @@ import java.util.regex.Pattern;
  * @since 2024/6/4 18:26
  */
 @Setter
+@SuppressWarnings("java:S135")
 public class LogRecordValueParser implements BeanFactoryAware {
 
     private static final Pattern PATTERN = Pattern.compile("\\{\\s*(\\w*)\\s*\\{(.*?)}}");
@@ -66,7 +67,7 @@ public class LogRecordValueParser implements BeanFactoryAware {
             }
 
             Matcher matcher = PATTERN.matcher(expressionTemplate);
-            StringBuilder parsedResultMsg = new StringBuilder();
+            StringBuffer parsedResultMsg = new StringBuffer();
             AnnotatedElementKey annotatedElementKey = new AnnotatedElementKey(methodExecuteResult.getMethod(), methodExecuteResult.getTargetClass());
             while (matcher.find()) {
                 String expression = matcher.group(2);

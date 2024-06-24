@@ -16,5 +16,5 @@ public interface ILogRecordService {
      *
      * @param logRecord 日志信息
      */
-    void record(LogRecordModel logRecord);
+    void logRecord(LogRecordModel logRecord);
 }

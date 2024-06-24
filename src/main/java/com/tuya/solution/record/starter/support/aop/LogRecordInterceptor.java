@@ -33,6 +33,7 @@ import java.util.stream.Collectors;
  */
 @Setter
 @Slf4j
+@SuppressWarnings({"java:S1948","java:S135"})
 public class LogRecordInterceptor extends LogRecordValueParser implements MethodInterceptor, Serializable, SmartInitializingSingleton {
 
     /**
@@ -304,13 +305,13 @@ public class LogRecordInterceptor extends LogRecordValueParser implements Method
                 .createTime(System.currentTimeMillis())
                 .build();
 
-        bizLogService.record(logRecord);
+        bizLogService.logRecord(logRecord);
     }
 
     private Map<CodeVariableType, Object> getCodeVariable(Method method) {
-        Map<CodeVariableType, Object> map = new HashMap<>();
-        map.put(CodeVariableType.ClassName, method.getDeclaringClass());
-        map.put(CodeVariableType.MethodName, method.getName());
+        Map<CodeVariableType, Object> map = new EnumMap<>(CodeVariableType.class);
+        map.put(CodeVariableType.CLASS_NAME, method.getDeclaringClass());
+        map.put(CodeVariableType.METHOD_NAME, method.getName());
         return map;
     }
 

@@ -8,6 +8,7 @@ import org.springframework.aop.support.AbstractBeanFactoryPointcutAdvisor;
  * @describe Bean工厂日志记录增强器
  * @since 2024/6/5 10:45
  */
+@SuppressWarnings("java:S2160")
 public class BeanFactoryLogRecordAdvisor extends AbstractBeanFactoryPointcutAdvisor {
 
     private final LogRecordPointcut pointcut = new LogRecordPointcut();

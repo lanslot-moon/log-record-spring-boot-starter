@@ -6,6 +6,6 @@ package com.tuya.solution.record.beans;
  * @since 2024/6/6 15:40
  */
 public enum CodeVariableType {
-    ClassName,
-    MethodName;
+    CLASS_NAME,
+    METHOD_NAME;
 }

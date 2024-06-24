@@ -12,6 +12,7 @@ import java.lang.reflect.Method;
  * @describe LogRecordAnnotation注解织入点
  * @since 2024/6/4 18:46
  */
+@SuppressWarnings("java:S1948")
 public class LogRecordPointcut extends StaticMethodMatcherPointcut implements Serializable {
     // LogRecord的解析类
     private LogRecordOperationSource logRecordOperationSource;
